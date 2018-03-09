@@ -1,2 +1,0 @@
-# ZPK
-traffic lights
