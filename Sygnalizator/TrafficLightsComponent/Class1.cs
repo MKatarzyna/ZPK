@@ -15,6 +15,9 @@ namespace TrafficLightsComponent
         private System.Windows.Forms.Timer timer;
         private bool isArrowLightening;
         private int counter;
+        private int counterGreen, counterGreen2, counterGreen3, counterGreen4;
+        private int counterRed, counterRed2, counterRed3, counterRed4;
+
         private int timeForAllStates;
         private int timeForRedLight;
         private int timeForGreenLight;
@@ -33,6 +36,15 @@ namespace TrafficLightsComponent
         int height1of4;
         int height2of4;
         int height3of4;
+
+        int restOfCycle4 = 0;
+        int restOfCycle3 = 0;
+        int restOfCycle2 = 0;
+
+        FontFamily fontFamily;
+        Font font;
+        SolidBrush solidBrushGreenFont;
+        SolidBrush solidBrushRedFont;
 
         Color brighterGreenColor = Color.FromArgb(255, 0, 255, 0);
         Color darkerGreenColor = Color.FromArgb(255, 0, 102, 0);
@@ -138,11 +150,16 @@ namespace TrafficLightsComponent
 
         public TrafficLightsComponent() // kontruktor bezparametrów. Ustawianie zmiennych
         {
+            
             isArrowLightening = true;
             nonCollisionMode = false;
             queueNumber = 1;
             timeForRedLight = 3;
             timeForGreenLight = 5;
+
+            CalculateAllTime();
+            restartGreenRedCounters();
+
             autoTime = 1; // czas na żółte światła
             sizeOfComponent = 5;
             Size = new Size(sizeOfComponent * 20, sizeOfComponent * 40); // ustawianie rozmiaru  
@@ -150,6 +167,19 @@ namespace TrafficLightsComponent
             height2of4 = (int)(Size.Height * 2 / 4);
             height3of4 = (int)(Size.Height * 3 / 4);
             chosenDirection = 0;
+        }
+
+        private void restartGreenRedCounters()
+        {
+            counterGreen = timeForGreenLight;
+            counterGreen2 = timeForGreenLight;
+            counterGreen3 = timeForGreenLight;
+            counterGreen4 = timeForGreenLight;
+            
+            counterRed = timeForRedLight + 3 * timeForAllStates;
+            counterRed2 = timeForRedLight + 2 * timeForAllStates;
+            counterRed3 = timeForRedLight + 1 * timeForAllStates;
+            counterRed4 = timeForRedLight;
         }
 
         // namalowanie niezapalonych świateł
@@ -303,6 +333,13 @@ namespace TrafficLightsComponent
            
             defaultStateOfLights(e, g);
 
+            //e.Graphics.DrawString("00", this.Font, Brushes.Black, 0, 0);
+            fontFamily = new FontFamily("Times New Roman");
+            font = new Font(fontFamily, 32, FontStyle.Regular, GraphicsUnit.Pixel);
+            solidBrushGreenFont = new SolidBrush(Color.FromArgb(255, 0, 255, 0));
+            solidBrushRedFont = new SolidBrush(Color.FromArgb(255, 255, 0, 0));
+
+
             if (chosenDirection == 0)
             {
                 defaultStateOfLights(e, g);
@@ -330,26 +367,40 @@ namespace TrafficLightsComponent
             else if (chosenDirection == 60)
             {
                 turnOnNonCollisionLeftLight(e, g);
+                e.Graphics.DrawString(counterGreen.ToString(), font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
             else if (chosenDirection == 10)
             {
                 turnOnRedLightNonCollision(e, g);
+                int temp = 0;
+                if (queueNumber == 1) temp = counter - (timeForAllStates * queueNumber - timeForRedLight);
+                if (queueNumber == 2) temp = counter - (timeForAllStates * queueNumber - timeForRedLight) + restOfCycle2;
+                if (queueNumber == 3) temp = counter - (timeForAllStates * queueNumber - timeForRedLight) + restOfCycle3;
+                if (queueNumber == 4) temp = counter - (timeForAllStates * queueNumber - timeForRedLight) + restOfCycle4;
+                e.Graphics.DrawString(temp.ToString(), font, solidBrushRedFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
             else if (chosenDirection == 20)
             {
                 turnOnRedYellowLightsNonCollision(e, g);
+                e.Graphics.DrawString(" ", font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
             else if (chosenDirection == 40)
             {
                 turnOnYellowLightNonCollision(e, g);
+                e.Graphics.DrawString(" ", font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
+        }
+
+        private void CalculateAllTime()
+        {
+            timeForAllStates = timeForRedLight + timeForGreenLight + autoTime + autoTime;
         }
 
         //liczniki ustalenia czasu (dlugosci cyklu) dla trybu standard i non-collision
         public void  StartCounter()
         {
-            timeForAllStates = timeForRedLight + timeForGreenLight + autoTime + autoTime;
-            
+            CalculateAllTime();
+
            if (nonCollisionMode == false)
              {
                 counter = timeForAllStates * 2;
@@ -369,6 +420,9 @@ namespace TrafficLightsComponent
         public void StopCounter()
         {
             timer.Stop();
+            restOfCycle4 = 0;
+            restOfCycle3 = 0;
+            restOfCycle2 = 0;
         }
 
         // odliczanie co jedna sekunde, ze sprawdzeniem jaki tryb i nastepnie włączenie świateł dla odpowiedniego komponentu
@@ -401,9 +455,27 @@ namespace TrafficLightsComponent
                 if (counter == 0)
                 {
                     counter = timeForAllStates * 4;
+                    restOfCycle4 = 0;
+                    restOfCycle3 = 0;
+                    restOfCycle2 = 0;
                 }
                 else
                 {
+                    if (counter == timeForAllStates * 4 - timeForAllStates * 4 / 4)
+                    {
+                        // do 4 dodaj pelne 4 cykle
+                       restOfCycle4 = timeForAllStates * 4;
+                        Console.Out.WriteLine("1 cykl");
+                    } else if (counter == timeForAllStates * 4 / 2)
+                    {
+                        // do 3 dodaj 4 cykle
+                        restOfCycle3 = timeForAllStates * 4;
+                    } else if (counter == timeForAllStates * 4 / 4)
+                    {
+                        // do 2 dodaj 4 cykle
+                        restOfCycle2 = timeForAllStates * 4;
+                    }
+
                     if (queueNumber == 1)
                     {
                         switchingNonCollisionLights();
@@ -429,6 +501,7 @@ namespace TrafficLightsComponent
             if (counter > (timeForAllStates * queueNumber - timeForRedLight))
             {
                 chosenDirection = 1; // RED
+                Console.WriteLine("RED: " + counter);
             }
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime))
             {
@@ -437,6 +510,7 @@ namespace TrafficLightsComponent
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime - timeForGreenLight))
             {
                 chosenDirection = 3; // GREEN
+                Console.WriteLine("GREEN: " + counter);
             }
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime - timeForGreenLight - autoTime))
             {
@@ -445,6 +519,7 @@ namespace TrafficLightsComponent
             else if (counter < (timeForAllStates* queueNumber - timeForRedLight - autoTime - timeForGreenLight - autoTime))
             {
                 chosenDirection = 1; // RED
+                Console.WriteLine("RED: " + counter);
             }
 
             Invalidate();
@@ -459,14 +534,17 @@ namespace TrafficLightsComponent
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime))
             {
                 chosenDirection = 20; // RED YELLOW
+                counterGreen = timeForGreenLight;
             }
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime - timeForGreenLight))
             {
                 chosenDirection = 60; // GREEN
+                showMeGreenCounter();
             }
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime - timeForGreenLight - autoTime))
             {
                 chosenDirection = 40; // YELLOW
+                counterGreen = timeForGreenLight;
             }
             else if (counter < (timeForAllStates * queueNumber - timeForRedLight - autoTime - timeForGreenLight - autoTime))
             {
@@ -474,5 +552,12 @@ namespace TrafficLightsComponent
             }
             Invalidate();
         }
+
+        private void showMeGreenCounter()
+        {
+            counterGreen--;
+        }
+
+        
     }
 }

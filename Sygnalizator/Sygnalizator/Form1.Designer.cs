@@ -32,10 +32,10 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.trafficLightsComponent4 = new TrafficLightsComponent.TrafficLightsComponent();
             this.trafficLightsComponent3 = new TrafficLightsComponent.TrafficLightsComponent();
             this.trafficLightsComponent2 = new TrafficLightsComponent.TrafficLightsComponent();
             this.trafficLightsComponent1 = new TrafficLightsComponent.TrafficLightsComponent();
+            this.trafficLightsComponent4 = new TrafficLightsComponent.TrafficLightsComponent();
             this.SuspendLayout();
             // 
             // button1
@@ -78,18 +78,6 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // trafficLightsComponent4
-            // 
-            this.trafficLightsComponent4.Location = new System.Drawing.Point(341, 187);
-            this.trafficLightsComponent4.Name = "trafficLightsComponent4";
-            this.trafficLightsComponent4.NonCollisionMode = false;
-            this.trafficLightsComponent4.QueueNumber = 1;
-            this.trafficLightsComponent4.Size = new System.Drawing.Size(100, 200);
-            this.trafficLightsComponent4.SizeOfComponent = 5;
-            this.trafficLightsComponent4.TabIndex = 9;
-            this.trafficLightsComponent4.TimeForGreenLight = 5;
-            this.trafficLightsComponent4.TimeForRedLight = 3;
-            // 
             // trafficLightsComponent3
             // 
             this.trafficLightsComponent3.Location = new System.Drawing.Point(221, 329);
@@ -125,6 +113,18 @@
             this.trafficLightsComponent1.TabIndex = 2;
             this.trafficLightsComponent1.TimeForGreenLight = 5;
             this.trafficLightsComponent1.TimeForRedLight = 3;
+            // 
+            // trafficLightsComponent4
+            // 
+            this.trafficLightsComponent4.Location = new System.Drawing.Point(373, 236);
+            this.trafficLightsComponent4.Name = "trafficLightsComponent4";
+            this.trafficLightsComponent4.NonCollisionMode = false;
+            this.trafficLightsComponent4.QueueNumber = 1;
+            this.trafficLightsComponent4.Size = new System.Drawing.Size(100, 200);
+            this.trafficLightsComponent4.SizeOfComponent = 5;
+            this.trafficLightsComponent4.TabIndex = 9;
+            this.trafficLightsComponent4.TimeForGreenLight = 5;
+            this.trafficLightsComponent4.TimeForRedLight = 3;
             // 
             // Form1
             // 
