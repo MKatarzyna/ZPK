@@ -33,6 +33,11 @@ namespace Sygnalizator
 
         private void button2_Click(object sender, EventArgs e)
         {
+            trafficLightsComponent4.RefreshUI();
+            trafficLightsComponent3.RefreshUI();
+            trafficLightsComponent2.RefreshUI();
+            trafficLightsComponent1.RefreshUI();
+
             trafficLightsComponent1.NonCollisionMode = true;
             trafficLightsComponent2.NonCollisionMode = true;
             trafficLightsComponent3.NonCollisionMode = true;
@@ -49,11 +54,16 @@ namespace Sygnalizator
             trafficLightsComponent1.QueueNumber = 4;
 
             button1.Enabled = true;
-            button4.Enabled = true;
+            button4.Enabled = true; 
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
+            trafficLightsComponent4.RefreshUI();
+            trafficLightsComponent3.RefreshUI();
+            trafficLightsComponent2.RefreshUI();
+            trafficLightsComponent1.RefreshUI();
+
             trafficLightsComponent1.NonCollisionMode = false;
             trafficLightsComponent2.NonCollisionMode = false;
             trafficLightsComponent3.NonCollisionMode = false;
@@ -86,6 +96,12 @@ namespace Sygnalizator
 
         private void button5_Click(object sender, EventArgs e)
         {
+
+            trafficLightsComponent4.RefreshUI();
+            trafficLightsComponent3.RefreshUI();
+            trafficLightsComponent2.RefreshUI();
+            trafficLightsComponent1.RefreshUI();
+
             trafficLightsComponent1.NonCollisionMode = false;
             trafficLightsComponent2.NonCollisionMode = false;
             trafficLightsComponent3.NonCollisionMode = false;
@@ -103,6 +119,8 @@ namespace Sygnalizator
 
             button1.Enabled = true;
             button4.Enabled = true;
+
+
         }
     }
 }

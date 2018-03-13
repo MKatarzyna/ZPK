@@ -25,7 +25,8 @@ namespace TrafficLightsComponent
 
         private bool nonCollisionMode;
         private int queueNumber; // numer w kolejce
-        
+        private bool isConditionalGreenLight1, isConditionalGreenLight2;
+
         private int chosenDirection;
 
         private int sizeOfComponent;
@@ -136,7 +137,7 @@ namespace TrafficLightsComponent
             set
             {
                 sizeOfComponent = value;
-                Size = new Size(sizeOfComponent * 10, sizeOfComponent * 30);
+                Size = new Size(sizeOfComponent * 20, sizeOfComponent * 40);
                 Invalidate();
             }
         }
@@ -157,16 +158,22 @@ namespace TrafficLightsComponent
 
         public TrafficLightsComponent() // kontruktor bezparametrów. Ustawianie zmiennych
         {
+            InitializeComponent();
+        }
+
+        private void InitializeComponent()
+        {
             isArrowLightening = false;
+
             nonCollisionMode = false;
             queueNumber = 1;
-            timeForRedLight = 3;
-            timeForGreenLight = 5;
+            timeForRedLight = 3;    // ustawiony czas dla działania światła czerwonego
+            timeForGreenLight = 5;  // ustawiony czas dla działania światła zielonego
 
             CalculateAllTime();
             restartGreenRedCounters();
 
-            autoTime = 1; // czas na żółte światła
+            autoTime = 1; // czas na żółte światła i żółto-czerwone
             sizeOfComponent = 5;
             Size = new Size(sizeOfComponent * 20, sizeOfComponent * 40); // ustawianie rozmiaru  
             height1of4 = (int)(Size.Height / 4); // 1/4 komponentu przeznaczona na licznik
@@ -175,10 +182,9 @@ namespace TrafficLightsComponent
             chosenDirection = 0;
         }
 
-        private void restartGreenRedCounters()
+        private void restartGreenRedCounters() // sluzy do <-, po jakim czasie maja sie ustawiac liczniki
         {
             counterGreen = timeForGreenLight;
-            
             counterRed2 = timeForRedLight + 2 * timeForAllStates;
             counterRed3 = timeForRedLight + 1 * timeForAllStates;
             counterRed4 = timeForRedLight;
@@ -347,10 +353,7 @@ namespace TrafficLightsComponent
                 // zgaszone czerwone strzałki                                                                                                                                                                        // wygaszona strzalka czerowna
                 g.DrawLine(penLineBlack, freeSpaceBar, freeSpaceBar + heightOfCircle / 2 + height1of4, freeSpaceBar + widthOfCircle / 2, freeSpaceBar + heightOfCircle / 2 + height1of4); // strzałka w lewo
                 g.DrawLine(penLineBlack, freeSpaceBar + widthOfCircle / 2, freeSpaceBar + height1of4, freeSpaceBar + widthOfCircle / 2, freeSpaceBar + heightOfCircle + height1of4);    // strzałka prosto
-
             }
-
-            
 
             //e.Graphics.DrawString("00", this.Font, Brushes.Black, 0, 0);
             fontFamily = new FontFamily("Times New Roman");
@@ -358,44 +361,53 @@ namespace TrafficLightsComponent
             solidBrushGreenFont = new SolidBrush(Color.FromArgb(255, 0, 255, 0));
             solidBrushRedFont = new SolidBrush(Color.FromArgb(255, 255, 0, 0));
 
-
             if (chosenDirection == 0)
             {
                 defaultStateOfLights(e, g);
             }
-            else if (chosenDirection == 1)
+            else if (chosenDirection == 1)  // wlacza czerwone swiatla, dla trybu standard i warunkowego
             {
                 turnOnRedLight(e, g);
                 int temp = 0;
                 if (queueNumber == 1) temp = counter - (timeForAllStates * queueNumber - timeForRedLight);
                 if (queueNumber == 2) temp = counter - (timeForAllStates * queueNumber - timeForRedLight) + restOfCycle2;
+
+                if (queueNumber == 1 && isConditionalGreenLight2 == true && isArrowLightening == true)
+                {
+                    turnOnConditionalRightLight(e, g);
+                }
+                if (queueNumber == 2 && isConditionalGreenLight1 == true && isArrowLightening == true)
+                {
+                    turnOnConditionalRightLight(e, g);
+                }
+
                 e.Graphics.DrawString(temp.ToString(), font, solidBrushRedFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
-            else if (chosenDirection == 2)
+            else if (chosenDirection == 2)  // wlacza czerwone i zolte swiatla, dla trybu standard i warunkowego
             {
                 turnOnRedYellowLights(e, g);
                 e.Graphics.DrawString(" ", font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
-            else if (chosenDirection == 3)
+            else if (chosenDirection == 3)  // wlacza zielone swiatla, dla trybu standard i warunkowego
             {
                 turnOnGreenLight(e, g);
                 e.Graphics.DrawString(counterGreen.ToString(), font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
-            else if (chosenDirection == 4)
+            else if (chosenDirection == 4)  // wlacza zolte swiatla, dla trybu standard i warunkowego
             {
                 turnOnYellowLight(e, g);
                 e.Graphics.DrawString(" ", font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
-            else if (chosenDirection == 5)
+          /*  else if (chosenDirection == 5)
             {
-                turnOnConditionalRightLight(e, g); // work, move to standard red with IF condition for boolean flag set by counter
-            }
-            else if (chosenDirection == 60)
+                turnOnConditionalRightLight(e, g);
+            } */
+            else if (chosenDirection == 60) // wlacza zielone strzalki, dla trybu bezkolizyjnego
             {
                 turnOnNonCollisionLeftLight(e, g);
                 e.Graphics.DrawString(counterGreen.ToString(), font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
-            else if (chosenDirection == 10)
+            else if (chosenDirection == 10) // wlacza czerwone strzalki, dla trybu bezkolizyjnego
             {
                 turnOnRedLightNonCollision(e, g);
                 int temp = 0;
@@ -405,37 +417,45 @@ namespace TrafficLightsComponent
                 if (queueNumber == 4) temp = counter - (timeForAllStates * queueNumber - timeForRedLight) + restOfCycle4;
                 e.Graphics.DrawString(temp.ToString(), font, solidBrushRedFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
-            else if (chosenDirection == 20)
+            else if (chosenDirection == 20) // wlacza czerwone i zolte strzalki, dla trybu bezkolizyjnego
             {
                 turnOnRedYellowLightsNonCollision(e, g);
                 e.Graphics.DrawString(" ", font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
-            else if (chosenDirection == 40)
+            else if (chosenDirection == 40) // wlacza zolte strzalki, dla trybu bezkolizyjnego
             {
                 turnOnYellowLightNonCollision(e, g);
                 e.Graphics.DrawString(" ", font, solidBrushGreenFont, new PointF(0 + freeSpaceBar, 0 + freeSpaceBar));
             }
         }
 
-        private void CalculateAllTime()
+        private void CalculateAllTime() // policzenie calego trwania cyklu (wszytskie 4 fazy dla jednego komponentu)
         {
             timeForAllStates = timeForRedLight + timeForGreenLight + autoTime + autoTime;
         }
 
-        //liczniki ustalenia czasu (dlugosci cyklu) dla trybu standard i non-collision
+        public void RefreshUI() //wyzerowanie opcji tak jak są ustawione przez konstruktor na starcie
+        {
+            InitializeComponent();
+            Invalidate();
+        }
+
+        //liczniki ustalenia czasu (dlugosci cyklu w zaleznosci od trybu) dla trybu standard i non-collision
         public void  StartCounter()
         {
             CalculateAllTime();
 
            if (nonCollisionMode == false)
              {
-                counter = timeForAllStates * 2;
+                counter = timeForAllStates * 2; // dla trybu standard i warunkowy
              }
            else if (nonCollisionMode == true)
              {
-                counter = timeForAllStates * 4;
+                counter = timeForAllStates * 4; // dla trybu bezkolizyjnego
             }
-    
+            if (queueNumber == 1) { isConditionalGreenLight2 = true; isConditionalGreenLight1 = false; }
+            if (queueNumber == 2) { isConditionalGreenLight1 = true; isConditionalGreenLight2 = false; }
+
             timer = new System.Windows.Forms.Timer();
             timer.Tick += new EventHandler(timerTick);
             timer.Interval = 1000; // 1 sekunda
@@ -451,14 +471,11 @@ namespace TrafficLightsComponent
             restOfCycle2 = 0;
         }
 
-        // odliczanie co jedna sekunde, ze sprawdzeniem jaki tryb i nastepnie włączenie świateł dla odpowiedniego komponentu
-
+        // wywołanie co jedna sekunde, ze sprawdzeniem jaki tryb i nastepnie włączenie świateł dla odpowiedniego komponentu
         private void timerTick(object sender, EventArgs e)
         {
             counter--;
-            //Console.WriteLine("Q: "+queueNumber+", count: " + counter);
-
-            if (nonCollisionMode == false)
+            if (nonCollisionMode == false)  // standard i warunkowy
             {
                 if (counter == 0)
                 {
@@ -466,14 +483,12 @@ namespace TrafficLightsComponent
                     restOfCycle2 = 0;
                 } else
                 {
-                    if (counter == timeForAllStates * 2 - timeForAllStates * 2 / 2)
+                    if (counter == timeForAllStates * 2 - timeForAllStates * 2 / 2) // rozpoznaje kiedy minela polowa
                     {
                         // do 2 dodaj pelne 2 cykle
                         restOfCycle2 = timeForAllStates * 2;
                     }
-                    
-
-                    if (queueNumber == 1)
+                    if (queueNumber == 1)   // przelaczenie swiatel, rozpoznaje ktory to jest komponent pierwszy czy drugi
                     {
                         switchingLights();
                     }
@@ -482,11 +497,10 @@ namespace TrafficLightsComponent
                         switchingLights();
                     }
                 }
-               
             }
-            else if (nonCollisionMode == true)
+            else if (nonCollisionMode == true)  // dla trybu bezkolzyjnego
             {
-                if (counter == 0)
+                if (counter == 0)   // jesli 0 to od nowa
                 {
                     counter = timeForAllStates * 4;
                     restOfCycle4 = 0;
@@ -494,7 +508,7 @@ namespace TrafficLightsComponent
                     restOfCycle2 = 0;
                 }
                 else
-                {
+                {   // sprawdza w której jest fazie całego przebiegu (łączny czas czterech komponentów)
                     if (counter == timeForAllStates * 4 - timeForAllStates * 4 / 4)
                     {
                         // do 4 dodaj pelne 4 cykle
@@ -508,7 +522,7 @@ namespace TrafficLightsComponent
                         // do 2 dodaj 4 cykle
                         restOfCycle2 = timeForAllStates * 4;
                     }
-
+                    // rozpoznaje który jest aktualnie wlaczony
                     if (queueNumber == 1)
                     {
                         switchingNonCollisionLights();
@@ -529,22 +543,23 @@ namespace TrafficLightsComponent
             }
        }
 
-        private void switchingLights()
+        private void switchingLights() // wlaczana w TimerTicku
         {
             if (counter > (timeForAllStates * queueNumber - timeForRedLight))
             {
                 chosenDirection = 1; // RED
-                Console.WriteLine("RED: " + counter);
             }
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime))
             {
                 chosenDirection = 2; // RED YELLOW
                 counterGreen = timeForGreenLight;
+
+                if (queueNumber == 1) { isConditionalGreenLight2 = true; isConditionalGreenLight1 = false; }
+                if (queueNumber == 2) { isConditionalGreenLight1 = true; isConditionalGreenLight2 = false; }
             }
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime - timeForGreenLight))
             {
                 chosenDirection = 3; // GREEN
-                Console.WriteLine("GREEN: " + counter);
                 decreaseGreenCounter();
             }
             else if (counter > (timeForAllStates * queueNumber - timeForRedLight - autoTime - timeForGreenLight - autoTime))
@@ -555,9 +570,7 @@ namespace TrafficLightsComponent
             else if (counter < (timeForAllStates* queueNumber - timeForRedLight - autoTime - timeForGreenLight - autoTime))
             {
                 chosenDirection = 1; // RED
-                Console.WriteLine("RED: " + counter);
             }
-
             Invalidate();
         }
 
@@ -589,7 +602,7 @@ namespace TrafficLightsComponent
             Invalidate();
         }
 
-        private void decreaseGreenCounter()
+        private void decreaseGreenCounter() // dla strzałki bezkolizyjnej zielonej <-
         {
             counterGreen--;
         } 
